@@ -65,6 +65,7 @@ intrinsic ThetaFlint(char::Mtrx, z::Mtrx, tau::Mtrx[FldCom]) -> SeqEnum
   require NumberOfRows(z) eq g:
     "The second argument must have g rows.";
   require NumberOfColumns(z) eq 1:
+    "The second argument must have 1 column.";
   // we force it to be symmetric
   tau := (tau + Transpose(tau))/2;
   Imtau := Matrix([ [ Im(c) : c in Eltseq(row) ] : row in Rows(tau) ]);

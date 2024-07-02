@@ -9,7 +9,7 @@ intrinsic CacheClearThetaFlint()
   // happen
   StoreClear(theta_flint_cache);
   StoreSet(theta_flint_cache, "cache", AssociativeArray());
-d intrinsic;
+end intrinsic;
 
 intrinsic CacheThetaFlint() -> Assoc
 {Clear the internal cache for GeometricHomomorphismRepresentationCC}
@@ -52,7 +52,7 @@ function GetCache(tau, z)
     return false;
   end if;
   return IsDefined(cache1[k2]);
-end;
+end function;
 
 forward call_python_flint;
 intrinsic ThetaFlint(z::Mtrx, tau::Mtrx[FldCom]) -> FldComElt
@@ -135,8 +135,8 @@ print(acb_entries_to_magma(theta))
     acb_z := to_acb_matrix(z);
     try
       digits := Max(digits, Precision(BaseRing(z)));
-    catch
-      digits := digits;
+    catch e
+      _ := true;
     end try;
   end if;
   working_digits := Ceiling(digits*1.1 + 10);
@@ -148,7 +148,7 @@ print(acb_entries_to_magma(theta))
     if out eq "ImportError\n" then
       error "Could not install python-flint";
     end if;
-  d if;
+  end if;
   return eval out;
 end function;
 
