@@ -23,11 +23,20 @@ end intrinsic;
 
 function CacheKeys(tau, z)
   g := Nrows(tau);
-  k1 := <g, Precision(BaseRing(tau)), Precision(BaseRing(z))>;
+  assert Ncols(z) eq 1;
+  assert Nrows(z) eq g;
+  assert Ncols(tau) eq g;
+  try
+    precz := Precision(BaseRing(z));
+  catch e
+    precz := -1;
+    z := ChangeRing(z, Rationals());
+  end try;
+  k1 := <g, Precision(BaseRing(tau)), precz>;
   k2 := <tau, z>;
   return k1, k2;
 end function;
-function SetCache(tau, z, v)
+procedure SetCache(tau, z, v)
   bool, cache := StoreIsDefined(theta_flint_cache, "cache");
   if not bool then
     cache := AssociativeArray();
@@ -38,18 +47,18 @@ function SetCache(tau, z, v)
   end if;
   cache[k1][k2] := v;
   StoreSet(theta_flint_cache, "cache", cache);
-end function;
+end procedure;
 
 function GetCache(tau, z)
   k1, k2 := CacheKeys(tau, z);
   bool, cache := StoreIsDefined(theta_flint_cache, "cache");
   if not bool then
     cache := AssociativeArray();
-    return false;
+    return false, _;
   end if;
   bool, cache1 := IsDefined(cache, k1);
   if not bool then
-    return false;
+    return false, _;
   end if;
   return IsDefined(cache1[k2]);
 end function;
@@ -57,7 +66,7 @@ end function;
 forward call_python_flint;
 intrinsic ThetaFlint(z::Mtrx, tau::Mtrx[FldCom]) -> FldComElt
 { Computes the multidimensional theta function for all characteristics at z (a gx1 matrix) and tau (a symmetric gxg matrix with positive definite imaginary part).}
-  bool, v := GetCache(z, tau);
+  bool, v := GetCache(tau, z);
   if bool then
     return v;
   end if;

@@ -35,6 +35,7 @@ function IntegerToCharacteristic(n, g)
 end function;
 
 function IsPositiveDefiniteImproved(M : prec := 0);
+  assert M eq Transpose(M);
   /* To avoid stupid numerical behavior of IsPositiveDefinite */
   if prec eq 0 then
     RR := BaseRing(M); prec := Precision(RR) div 2;
@@ -48,13 +49,18 @@ function IsPositiveDefiniteImproved(M : prec := 0);
       end if;
     end for;
   end for;
-  if Abs(Determinant(M)) lt 10^(-prec) or not IsSymmetricImproved(M) then
+  if Abs(Determinant(M)) lt 10^(-prec) then
     return false;
   end if;
 return IsPositiveDefinite(ChangeRing(M, RRSmall));
 end function;
 
-
+/*
+AttachSpec("spec");
+R<x> := PolynomialRing(Rationals()); C := HyperellipticCurve(R![-2, 2, -4, 2, -1], R![1, 1, 0, 1]);
+tau := SmallPeriodMatrix(PeriodMatrix(C));
+ThetaFlint(Matrix([[0],[0],[0],[0]]), ZeroMatrix(Integers(), 2,1), tau);
+*/
 intrinsic ThetaFlint(char::Mtrx, z::Mtrx, tau::Mtrx[FldCom]) -> SeqEnum
 { Computes the multidimensional theta function with characteristic char (a (2g)x1 matrix) at z (a gx1 matrix) and tau (a symmetric gxg matrix with positive definite imaginary part).}
   g := NumberOfRows(tau);
@@ -74,5 +80,5 @@ intrinsic ThetaFlint(char::Mtrx, z::Mtrx, tau::Mtrx[FldCom]) -> SeqEnum
 
   n := CharacteristicToInteger(char);
   v := ThetaFlint(z, tau);
-  return v[n];
+  return v[n + 1];
 end intrinsic;
