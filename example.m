@@ -1,9 +1,8 @@
 //SetDebugOnError(true);
 AttachSpec("spec");
 
-        : c in CartesianPower({0,1/2},2*g) ] where g:=2;
 SetVerbose("ThetaFlint", 2);
-chars := [ Matrix(2*g,1, [c[i] : i in [1..2*g]])
+chars := [ Matrix(2*g,1, [c[i] : i in [1..2*g]]) : c in CartesianPower({0,1/2},2*g) ] where g:=2;
 R<x> := PolynomialRing(RationalsExtra(500));
 C := HyperellipticCurve(R![-2, 2, -4, 2, -1], R![1, 1, 0, 1]);
 tau := SmallPeriodMatrix(PeriodMatrix(C));
