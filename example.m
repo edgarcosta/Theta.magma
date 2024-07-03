@@ -1,25 +1,9 @@
 //SetDebugOnError(true);
 AttachSpec("spec");
 
-chars := [ KMatrixSpace(RationalField(), 4, 1) |
-[0, 0, 0, 0],
-[ 0, 0, 0, 1/2 ],
-[ 0, 0, 1/2, 0 ],
-[ 0, 0, 1/2, 1/2 ],
-[ 0, 1/2, 0, 0 ],
-[ 0, 1/2, 0, 1/2 ],
-[ 0, 1/2, 1/2, 0 ],
-[ 0, 1/2, 1/2, 1/2 ],
-[ 1/2, 0, 0, 0 ],
-[ 1/2, 0, 0, 1/2 ],
-[ 1/2, 0, 1/2, 0 ],
-[ 1/2, 0, 1/2, 1/2 ],
-[ 1/2, 1/2, 0, 0 ],
-[ 1/2, 1/2, 0, 1/2 ],
-[ 1/2, 1/2, 1/2, 0 ],
-[ 1/2, 1/2, 1/2, 1/2 ]
-];
+        : c in CartesianPower({0,1/2},2*g) ] where g:=2;
 SetVerbose("ThetaFlint", 2);
+chars := [ Matrix(2*g,1, [c[i] : i in [1..2*g]])
 R<x> := PolynomialRing(RationalsExtra(500));
 C := HyperellipticCurve(R![-2, 2, -4, 2, -1], R![1, 1, 0, 1]);
 tau := SmallPeriodMatrix(PeriodMatrix(C));
