@@ -91,7 +91,7 @@ function GetPaths()
   return [venv_path, python_path];
 end function;
 
-procedure create_venv(venv_path)
+procedure assure_venv(venv_path)
   try
     _ := Pipe(Sprintf("test -d %o", venv_path), "");
   catch e
@@ -108,7 +108,7 @@ function python_version()
   return Join(Split(Split(version_info, " ")[2], ".")[1..2], ".");
 end function;
 
-procedure call_pip(venv_path)
+procedure assure_python_flint_in_venv(venv_path)
   version := python_version();
   sites_path := Sprintf("%o/lib/python%o/site-packages", venv_path, version);
   package_path := Sprintf("%o/python_flint-%o.dist-info", sites_path, python_flint_version);
@@ -124,10 +124,10 @@ procedure call_pip(venv_path)
   end try;
 end procedure;
 
-procedure install_python_flint()
+procedure assure_python_flint()
   venv := GetPaths()[1];
-  create_venv(venv);
-  call_pip(venv);
+  assure_venv(venv);
+  assure_python_flint_in_venv(venv);
 end procedure;
 
 function call_python_flint(tau, z)
@@ -172,7 +172,7 @@ print(acb_entries_to_magma(theta))
   working_digits := Ceiling(digits*1.1 + 10);
   acb_tau := to_acb_matrix(tau);
   cmd := Sprintf(cmd, working_digits, acb_tau, acb_z);
-  install_python_flint();
+  assure_python_flint();
   python_path := GetPaths()[2];
 
   vprintf ThetaFlint: "Calling python...";
