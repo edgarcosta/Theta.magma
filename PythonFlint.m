@@ -110,7 +110,7 @@ end function;
 
 procedure call_pip(venv_path)
   version := python_version();
-  sites_path := Sprintf("%o/lib/python%o/site-packages", venv, version);
+  sites_path := Sprintf("%o/lib/python%o/site-packages", venv_path, version);
   package_path := Sprintf("%o/python_flint-%o.dist-info", sites_path, python_flint_version);
   // check if the package is there
   try
