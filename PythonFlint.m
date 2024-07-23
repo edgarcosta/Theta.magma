@@ -118,7 +118,7 @@ procedure assure_python_flint_in_venv(venv_path)
   catch e // if not installs it
     vprintf ThetaFlint: "installing python-flint...";
     vtime ThetaFlint:
-      cmd := "python3 -m pip install python-flint==%o --no-input --disable-pip-version-check --force-reinstall --pre --target='%o'";
+      cmd := "python3 -m pip install python-flint==%o --no-input --disable-pip-version-check --force-reinstall --upgrade --pre --target='%o'";
     _ := Pipe(Sprintf(cmd, python_flint_version, sites_path), "");
     _ := Pipe(Sprintf("test -d %o", package_path), "");
   end try;
