@@ -1,4 +1,4 @@
-
+python_flint_version := "0.7.0a4";
 
 declare verbose ThetaFlint, 2;
 theta_flint_cache := NewStore();
@@ -91,17 +91,43 @@ function GetPaths()
   return [venv_path, python_path];
 end function;
 
+procedure create_venv(venv_path)
+  try
+    _ := Pipe(Sprintf("test -d %o", venv), "");
+  catch e
+    vprintf ThetaFlint: "creating venv python-flint...";
+    cmd := "python3 -m venv '%o' --without-pip";
+    vtime ThetaFlint:
+    _ := Pipe("sh", Sprintf(cmd, venv_path));
+    _ := Pipe(Sprintf("test -d %o", venv_path), "");
+  end try;
+end procedure;
 
-procedure install_python_flint()
-cmd := "
-venv_name='%o'
-python3 -m venv \"$venv_name\" --without-pip
-VERSION=`python3 -c 'import sys; print(\".\".join(map(str, sys.version_info[:2])))'`
-python3 -m pip install python-flint --no-input --disable-pip-version-check --upgrade --pre --target=\"$venv_name/lib/python$VERSION/site-packages\"
-";
+function python_version()
+  version_info := Pipe("python3 --version", ""); // Python 3.X.Y
+  return Join(Split(Split(version_info, " ")[2], ".")[1..2], ".");
+end function;
+
+procedure call_pip(venv_path)
+  version := python_version();
+  sites_path := Sprintf("%o/lib/python%o/site-packages", venv, version);
+  package_path := Sprintf("%o/python_flint-%o.dist-info", sites_path, python_flint_version);
+  // check if the package is there
+  try
+    _ := Pipe(Sprintf("test -d %o", package_path), "");
+  catch e // if not installs it
     vprintf ThetaFlint: "installing python-flint...";
     vtime ThetaFlint:
-  _ := Pipe("sh", Sprintf(cmd, GetPaths()[1]));
+      cmd := "python3 -m pip install python-flint==%o --no-input --disable-pip-version-check --force-reinstall --pre --target='%o'";
+    _ := Pipe(Sprintf(cmd, python_flint_version, sites_path), "");
+    _ := Pipe(Sprintf("test -d %o", package_path), "");
+  end try;
+end procedure;
+
+procedure install_python_flint()
+  venv := GetPaths()[1];
+  create_venv(venv);
+  call_pip(venv);
 end procedure;
 
 function call_python_flint(tau, z)
