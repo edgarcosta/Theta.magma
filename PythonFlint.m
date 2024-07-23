@@ -172,13 +172,8 @@ print(acb_entries_to_magma(theta))
   working_digits := Ceiling(digits*1.1 + 10);
   acb_tau := to_acb_matrix(tau);
   cmd := Sprintf(cmd, working_digits, acb_tau, acb_z);
+  install_python_flint();
   python_path := GetPaths()[2];
-  try
-    _ := Pipe(Sprintf("test -f %o", python_path), "");
-  catch e
-    install_python_flint();
-    _ := Pipe(Sprintf("test -f %o", python_path), "");
-  end try;
 
   vprintf ThetaFlint: "Calling python...";
   vtime ThetaFlint:
