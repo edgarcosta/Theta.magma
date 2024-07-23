@@ -93,7 +93,7 @@ end function;
 
 procedure create_venv(venv_path)
   try
-    _ := Pipe(Sprintf("test -d %o", venv), "");
+    _ := Pipe(Sprintf("test -d %o", venv_path), "");
   catch e
     vprintf ThetaFlint: "creating venv python-flint...";
     cmd := "python3 -m venv '%o' --without-pip";
