@@ -12,7 +12,7 @@ end function;
 function HalfCharacteristicToInteger(char)
   assert Ncols(char) eq 1;
   char := ChangeRing(2*char, Integers());
-  return SequenceToInteger(Reverse(Eltseq(char)), 2);
+  return SequenceToInteger(Reverse([elt mod 2 : elt in Eltseq(char)]), 2);
 end function;
 
 function CharacteristicToPair(char)
