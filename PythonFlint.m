@@ -82,13 +82,17 @@ to_acb_list := func<elt | Sprintf("[%o]", Join([to_acb(x) : x in elt], ", "))> ;
 to_acb_matrix := func<elt | Sprintf("acb_mat([%o])", Join([to_acb_list(Eltseq(x)) : x in Rows(elt)], ", ")) >;
 
 
+
 function GetPaths()
-  filenames := GetFilenames(CacheClearThetaFlint);
-  assert #filenames eq 1;
-  package_path := "/" cat Join(s[1..(#s - 1)], "/") where s := Split(filenames[1,1],"/");
-  venv_path := package_path cat "/flint";
-  python_path := "'" cat venv_path cat "/bin/python'";
-  return [venv_path, python_path];
+  if not StoreIsDefined(theta_flint_cache, "paths") then
+    filenames := GetFilenames(CacheClearThetaFlint);
+    assert #filenames eq 1;
+    package_path := "/" cat Join(s[1..(#s - 1)], "/") where s := Split(filenames[1,1],"/");
+    venv_path := package_path cat "/flint";
+    python_path := "'" cat venv_path cat "/bin/python'";
+    StoreSet(theta_flint_cache, "paths", [venv_path, python_path]);
+  end if;
+  return StoreGet(theta_flint_cache, "paths");
 end function;
 
 procedure assure_venv(venv_path)
@@ -125,9 +129,12 @@ procedure assure_python_flint_in_venv(venv_path)
 end procedure;
 
 procedure assure_python_flint()
-  venv := GetPaths()[1];
-  assure_venv(venv);
-  assure_python_flint_in_venv(venv);
+  if not StoreIsDefined(theta_flint_cache, "python_flint") then
+    venv := GetPaths()[1];
+    assure_venv(venv);
+    assure_python_flint_in_venv(venv);
+    StoreSet(theta_flint_cache, "python_flint", true);
+  end if;
 end procedure;
 
 function call_python_flint(tau, z)
