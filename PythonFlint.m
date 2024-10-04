@@ -1,4 +1,4 @@
-
+python_flint_version := "0.7.0a4";
 
 declare verbose ThetaFlint, 2;
 theta_flint_cache := NewStore();
@@ -91,17 +91,43 @@ function GetPaths()
   return [venv_path, python_path];
 end function;
 
-
-procedure install_python_flint()
-cmd := "
-venv_name='%o'
-python3 -m venv \"$venv_name\" --without-pip
-VERSION=`python3 -c 'import sys; print(\".\".join(map(str, sys.version_info[:2])))'`
-python3 -m pip install python-flint --no-input --disable-pip-version-check --upgrade --pre --target=\"$venv_name/lib/python$VERSION/site-packages\"
-";
-    vprintf ThetaFlint: "installing python-flint...";
+procedure assure_venv(venv_path)
+  try
+    _ := Pipe(Sprintf("test -d %o", venv_path), "");
+  catch e
+    vprintf ThetaFlint: "creating venv python-flint...";
+    cmd := "python3 -m venv '%o' --without-pip";
     vtime ThetaFlint:
-  _ := Pipe("sh", Sprintf(cmd, GetPaths()[1]));
+    _ := Pipe("sh", Sprintf(cmd, venv_path));
+    _ := Pipe(Sprintf("test -d %o", venv_path), "");
+  end try;
+end procedure;
+
+function python_version()
+  version_info := Pipe("python3 --version", ""); // Python 3.X.Y
+  return Join(Split(Split(version_info, " ")[2], ".")[1..2], ".");
+end function;
+
+procedure assure_python_flint_in_venv(venv_path)
+  version := python_version();
+  sites_path := Sprintf("%o/lib/python%o/site-packages", venv_path, version);
+  package_path := Sprintf("%o/python_flint-%o.dist-info", sites_path, python_flint_version);
+  // check if the package is there
+  try
+    _ := Pipe(Sprintf("test -d %o", package_path), "");
+  catch e // if not installs it
+    vprintf ThetaFlint: "installing python-flint...";
+    cmd := "python3 -m pip install python-flint==%o --no-input --disable-pip-version-check --force-reinstall --upgrade --pre --target='%o'";
+    vtime ThetaFlint:
+    _ := Pipe(Sprintf(cmd, python_flint_version, sites_path), "");
+    _ := Pipe(Sprintf("test -d %o", package_path), "");
+  end try;
+end procedure;
+
+procedure assure_python_flint()
+  venv := GetPaths()[1];
+  assure_venv(venv);
+  assure_python_flint_in_venv(venv);
 end procedure;
 
 function call_python_flint(tau, z)
@@ -146,13 +172,8 @@ print(acb_entries_to_magma(theta))
   working_digits := Ceiling(digits*1.1 + 10);
   acb_tau := to_acb_matrix(tau);
   cmd := Sprintf(cmd, working_digits, acb_tau, acb_z);
+  assure_python_flint();
   python_path := GetPaths()[2];
-  try
-    _ := Pipe(Sprintf("test -f %o", python_path), "");
-  catch e
-    install_python_flint();
-    _ := Pipe(Sprintf("test -f %o", python_path), "");
-  end try;
 
   vprintf ThetaFlint: "Calling python...";
   vtime ThetaFlint:

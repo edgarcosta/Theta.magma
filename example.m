@@ -1,5 +1,5 @@
 //SetDebugOnError(true);
-AttachSpec("spec");
+//AttachSpec("spec");
 
 SetVerbose("ThetaFlint", 2);
 chars := [ Matrix(2*g,1, [c[i] : i in [1..2*g]]) : c in CartesianPower({0,1/2},2*g) ] where g:=2;
