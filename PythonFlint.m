@@ -121,9 +121,14 @@ procedure assure_python_flint_in_venv(venv_path)
     _ := Pipe(Sprintf("test -d %o", package_path), "");
   catch e // if not installs it
     vprintf ThetaFlint: "installing python-flint...";
-    cmd := "python3 -m pip install python-flint==%o --no-input --disable-pip-version-check --force-reinstall --upgrade --pre --target='%o'";
+    cmd_format := "python3 -m pip install python-flint==%o --no-input --disable-pip-version-check --force-reinstall --upgrade --pre --target='%o'";
+    cmd := Sprintf(cmd_format, python_flint_version, sites_path);
     vtime ThetaFlint:
-    _ := Pipe(Sprintf(cmd, python_flint_version, sites_path), "");
+    try
+      _ := Pipe(cmd, "");
+    catch e1
+      error Sprintf("Could not install pythn-flint, the following command failed:\n %o", cmd);
+    end try;
     _ := Pipe(Sprintf("test -d %o", package_path), "");
   end try;
 end procedure;
